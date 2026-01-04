@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Expo Feedback Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #0a0e27, #1a0b2e, #000000);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto 40px;
+            background: rgba(30, 41, 82, 0.4);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(100, 200, 255, 0.3);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 150, 255, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .rocket { font-size: 60px; animation: float 3s ease-in-out infinite; display: inline-block; margin-bottom: 15px; }
+
+        h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #00d4ff, #b45cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .form-group { margin-bottom: 25px; }
+        label { display: block; color: #4dd0e1; font-weight: 600; margin-bottom: 8px; font-size: 14px; text-align: left; }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(15, 25, 50, 0.6);
+            border: 2px solid rgba(100, 200, 255, 0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #success-notification {
+            display: none;
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedbacks-section {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(30, 41, 82, 0.4);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(100, 200, 255, 0.3);
+            border-radius: 30px;
+            padding: 40px;
+        }
+
+        .feedback-card {
+            background: rgba(15, 25, 50, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: left;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .feedback-name { color: #00d4ff; font-weight: bold; }
+        .feedback-text { margin-top: 5px; font-size: 14px; line-height: 1.4; }
+        .feedback-date { font-size: 10px; color: #8fb3ff; margin-top: 8px; opacity: 0.7; }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: 1px solid #b45cff;
+            color: #b45cff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        h2 { color: #b45cff; }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="rocket">🚀</div>
+            <h1>Space Expo Feedback</h1>
+            <p style="color: #8fb3ff">Help us explore new frontiers</p>
+        </div>
+
+        <form id="feedbackForm">
+            <div class="form-group">
+                <label>Astronaut Name</label>
+                <input type="text" id="name" required placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+                <label>Mission Control Email</label>
+                <input type="email" id="email" required placeholder="your.email@space.com">
+            </div>
+            <div class="form-group">
+                <label>Your Feedback</label>
+                <textarea id="feedback" required placeholder="Share your experience..."></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">🌟 Launch Feedback</button>
+        </form>
+
+        <div id="success-notification">
+            ✨ Transmission Successful! Data logged.
+        </div>
+    </div>
+
+    <div class="feedbacks-section">
+        <div class="section-header">
+            <h2>📡 Incoming Transmissions</h2>
+            <button class="refresh-btn" onclick="loadFeedbacks()">Re-scan 🛰️</button>
+        </div>
+        <div id="feedbacksList">
+            <p style="color: #8fb3ff">Connecting to deep space network...</p>
+        </div>
+    </div>
+
+    <script>
+        // Ensure this URL is exactly as provided by SheetDB
+        const scriptURL = 'https://sheetdb.io/api/v1/693ca4ginwyfz';
+
+        // Star generation
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        async function loadFeedbacks() {
+            const list = document.getElementById('feedbacksList');
+            try {
+                const response = await fetch(scriptURL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                console.log("Data received from SheetDB:", data);
+
+                const latest = Array.isArray(data) ? data.slice(-5).reverse() : [];
+                
+                if (latest.length === 0) {
+                    list.innerHTML = '<p style="color: #8fb3ff; text-align: center; padding: 20px;">🌌 No transmissions found in the logs.</p>';
+                    return;
+                }
+
+                list.innerHTML = latest.map(f => `
+                    <div class="feedback-card">
+                        <div class="feedback-name">👨‍🚀 ${f.Name || 'Unknown Voyager'}</div>
+                        <div class="feedback-text">${f.Feedback || 'No message content.'}</div>
+                        <div class="feedback-date">${f.Date || ''}</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error("Load Error:", e);
+                list.innerHTML = `<p style="color: #ff4d4d; text-align: center; padding: 20px;">⚠️ Signal Interrupted: ${e.message}<br><small>Check console for details</small></p>`;
+            }
+        }
+
+        // Initial load
+        loadFeedbacks();
+
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const notification = document.getElementById('success-notification');
+            
+            btn.disabled = true;
+            btn.innerText = "🛰️ Transmitting...";
+            notification.style.display = 'none';
+
+            const payload = {
+                data: [{
+                    Name: document.getElementById('name').value,
+                    Email: document.getElementById('email').value,
+                    Feedback: document.getElementById('feedback').value,
+                    Date: new Date().toLocaleString()
+                }]
+            };
+
+            try {
+                const res = await fetch(scriptURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    this.reset();
+                    notification.style.display = 'block';
+                    notification.innerText = "✨ Transmission Successful!";
+                    loadFeedbacks(); 
+                    setTimeout(() => { notification.style.display = 'none'; }, 5000);
+                } else {
+                    throw new Error('Server responded with ' + res.status);
+                }
+            } catch (err) {
+                console.error("Submit Error:", err);
+                alert("Mission failure! Check if your SheetDB API is enabled.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "🌟 Launch Feedback";
+            }
+        });
+
+        // Periodic refresh
+        setInterval(loadFeedbacks, 30000);
+    </script>
+</body>
+</html>
